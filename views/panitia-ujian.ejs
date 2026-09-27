@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kendali Ujian & Nilai - Panitia</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px; }
+        .wadah { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .menu-navigasi { background-color: #eef2f5; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .menu-navigasi a { margin-right: 20px; text-decoration: none; color: #0056b3; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #dddddd; padding: 12px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .badge-aktif { color: #007bff; font-weight: bold; }
+        .badge-selesai { color: #28a745; font-weight: bold; }
+        .bahaya { color: #dc3545; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="wadah">
+        <h1>Kendali Ujian & Pantauan Nilai Peserta</h1>
+        <div class="menu-navigasi">
+            <a href="/dasbor-panitia">Kembali ke Dasbor</a>
+        </div>
+
+        <% if (daftarHasil.length === 0) { %>
+            <p>Belum ada peserta yang memulai sesi ujian.</p>
+        <% } else { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nama Peserta</th>
+                        <th>Status Ujian</th>
+                        <th>Pelanggaran Tab</th>
+                        <th>Nilai Akhir</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% daftarHasil.forEach(function(hasil) { %>
+                        <tr>
+                            <td><%= hasil.pengguna.nama_lengkap %></td>
+                            <td>
+                                <% if (hasil.status_ujian === 'sedang_dikerjakan') { %>
+                                    <span class="badge-aktif">Sedang Mengerjakan</span>
+                                <% } else { %>
+                                    <span class="badge-selesai">Selesai</span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <span class="<%= hasil.jumlah_pelanggaran > 0 ? 'bahaya' : '' %>">
+                                    <%= hasil.jumlah_pelanggaran %> kali
+                                </span>
+                            </td>
+                            <td><strong><%= hasil.nilai_akhir !== null ? hasil.nilai_akhir.toFixed(2) : 'Belum dinilai' %></strong></td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        <% } %>
+    </div>
+
+</body>
+</html>

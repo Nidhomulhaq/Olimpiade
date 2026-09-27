@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruang Ujian Online</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
+        .wadah-ujian { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .header-ujian { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
+        .timer { background: #dc3545; color: white; padding: 10px 15px; border-radius: 5px; font-weight: bold; font-size: 1.1em; }
+        .peringatan-box { background: #fff3cd; color: #856404; padding: 10px; border-radius: 5px; margin-bottom: 20px; font-weight: bold; }
+        .soal-item { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+        .pilihan-label { display: block; margin: 8px 0; cursor: pointer; }
+        button.btn-kumpul { background-color: #28a745; color: white; border: none; padding: 12px 25px; border-radius: 5px; font-size: 1em; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; }
+        button.btn-kumpul:hover { background-color: #218838; }
+    </style>
+</head>
+<body>
+
+    <div class="wadah-ujian">
+        <div class="header-ujian">
+            <div>
+                <h2>Ujian Mata Pelajaran</h2>
+                <p>Peserta: <strong><%= pengguna.nama_lengkap %></strong></p>
+            </div>
+            <div class="timer" id="timer-tampilan">90:00</div>
+        </div>
+
+        <div class="peringatan-box">
+            Peringatan Anti-Cheat: Dilarang berpindah tab atau jendela peramban! Pelanggaran terdeteksi: <span id="counter-pelanggaran"><%= jumlahPelanggaran %></span> / 3
+        </div>
+
+        <% if (daftarSoal.length === 0) { %>
+            <p>Belum ada soal ujian yang dimasukkan oleh panitia.</p>
+        <% } else { %>
+            <form id="form-ujian">
+                <% daftarSoal.forEach(function(soal, index) { %>
+                    <div class="soal-item">
+                        <p><strong>Soal <%= index + 1 %>.</strong> <%= soal.teks_soal %></p>
+                        <label class="pilihan-label">
+                            <input type="radio" name="soal_<%= soal.id_soal %>" value="A" <%= jawabanTersimpan[soal.id_soal] === 'A' ? 'checked' : '' %>> A. <%= soal.pilihan_a %>
+                        </label>
+                        <label class="pilihan-label">
+                            <input type="radio" name="soal_<%= soal.id_soal %>" value="B" <%= jawabanTersimpan[soal.id_soal] === 'B' ? 'checked' : '' %>> B. <%= soal.pilihan_b %>
+                        </label>
+                        <label class="pilihan-label">
+                            <input type="radio" name="soal_<%= soal.id_soal %>" value="C" <%= jawabanTersimpan[soal.id_soal] === 'C' ? 'checked' : '' %>> C. <%= soal.pilihan_c %>
+                        </label>
+                        <label class="pilihan-label">
+                            <input type="radio" name="soal_<%= soal.id_soal %>" value="D" <%= jawabanTersimpan[soal.id_soal] === 'D' ? 'checked' : '' %>> D. <%= soal.pilihan_d %>
+                        </label>
+                    </div>
+                <% }); %>
+
+                <button type="button" id="btn-selesai" class="btn-kumpul">Kumpulkan Ujian Sekarang</button>
+            </form>
+        <% } %>
+    </div>
+
+    <script>
+        // 1. Logika Pengatur Waktu (Timer 90 Menit)
+        let totalWaktuDetik = 90 * 60; 
+        const timerTampilan = document.getElementById('timer-tampilan');
+
+        const hitungMundur = setInterval(() => {
+            let menit = Math.floor(totalWaktuDetik / 60);
+            let detik = totalWaktuDetik % 60;
+            timerTampilan.textContent = `${menit.toString().padStart(2, '0')}:${detik.toString().padStart(2, '0')}`;
+            
+            if (totalWaktuDetik <= 0) {
+                clearInterval(hitungMundur);
+                alert("Waktu ujian telah habis! Sistem akan mengumpulkan jawaban Anda secara otomatis.");
+                kumpulkanUjian();
+            }
+            totalWaktuDetik--;
+        }, 1000);
+
+        // 2. Kumpulan Data Jawaban & Auto-Save
+        function ambilSemuaJawaban() {
+            const formData = new FormData(document.getElementById('form-ujian'));
+            const jawabanObj = {};
+            for (let [key, value] of formData.entries()) {
+                if (key.startsWith('soal_')) {
+                    const idSoal = key.split('_')[1];
+                    jawabanObj[idSoal] = value;
+                }
+            }
+            return jawabanObj;
+        }
+
+        // Auto-save setiap ada perubahan pilihan
+        document.getElementById('form-ujian')?.addEventListener('change', () => {
+            fetch('/peserta/ujian/autosave', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ jawaban: ambilSemuaJawaban() })
+            });
+        });
+
+        // 3. Deteksi Anti-Cheat (Pindah Tab / Jendela)
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                fetch('/peserta/ujian/pelanggaran', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('counter-pelanggaran').textContent = data.totalPelanggaran;
+                    if (data.dihentikan) {
+                        alert("Anda terdeteksi berpindah tab sebanyak 3 kali! Ujian Anda dihentikan dan dikumpulkan otomatis.");
+                        window.location.href = '/dasbor-peserta';
+                    } else {
+                        alert("Peringatan! Anda terdeteksi meninggalkan halaman ujian. Sisa kesempatan: " + (3 - data.totalPelanggaran));
+                    }
+                });
+            }
+        });
+
+        // 4. Tombol Kumpul Ujian
+        function kumpulkanUjian() {
+            fetch('/peserta/ujian/selesai', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ jawaban: ambilSemuaJawaban() })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'sukses') {
+                    alert("Ujian berhasil dikumpulkan! Nilai Anda: " + data.nilai);
+                    window.location.href = '/dasbor-peserta';
+                }
+            });
+        }
+
+        document.getElementById('btn-selesai')?.addEventListener('click', () => {
+            if (confirm("Apakah Anda yakin ingin mengumpulkan ujian ini sekarang?")) {
+                kumpulkanUjian();
+            }
+        });
+    </script>
+</body>
+</html>

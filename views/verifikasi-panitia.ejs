@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifikasi Peserta - Panitia</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px; }
+        .wadah { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .menu-navigasi { background-color: #eef2f5; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .menu-navigasi a { margin-right: 20px; text-decoration: none; color: #0056b3; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #dddddd; padding: 12px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .btn-terima { background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+        .btn-tolak { background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+        .status-diterima { color: #28a745; font-weight: bold; }
+        .status-ditolak { color: #dc3545; font-weight: bold; }
+        form { display: inline; }
+    </style>
+</head>
+<body>
+
+    <div class="wadah">
+        <h1>Verifikasi Dokumen Peserta</h1>
+        <div class="menu-navigasi">
+            <a href="/dasbor-panitia">Kembali ke Dasbor</a>
+        </div>
+
+        <% if (daftarDokumen.length === 0) { %>
+            <p>Belum ada dokumen peserta yang masuk ke dalam sistem.</p>
+        <% } else { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nama Peserta</th>
+                        <th>Asal Sekolah</th>
+                        <th>Kartu Pelajar</th>
+                        <th>Bukti Pembayaran</th>
+                        <th>Status / Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% daftarDokumen.forEach(function(dok) { %>
+                        <tr>
+                            <td><%= dok.pengguna.nama_lengkap %></td>
+                            <td><%= dok.asal_sekolah %></td>
+                            <td><a href="/uploads/<%= dok.berkas_identitas %>" target="_blank">Lihat Berkas</a></td>
+                            <td><a href="/uploads/<%= dok.bukti_pembayaran %>" target="_blank">Lihat Bukti</a></td>
+                            <td>
+                                <!-- Menampilkan tombol hanya jika status masih menunggu -->
+                                <% if (dok.status_verifikasi === 'menunggu') { %>
+                                    <form action="/panitia/verifikasi/<%= dok.id_dokumen %>" method="POST">
+                                        <input type="hidden" name="aksi" value="terima">
+                                        <button type="submit" class="btn-terima">Terima</button>
+                                    </form>
+                                    <form action="/panitia/verifikasi/<%= dok.id_dokumen %>" method="POST">
+                                        <input type="hidden" name="aksi" value="tolak">
+                                        <button type="submit" class="btn-tolak">Tolak</button>
+                                    </form>
+                                <% } else if (dok.status_verifikasi === 'diterima') { %>
+                                    <span class="status-diterima">Terverifikasi</span>
+                                <% } else if (dok.status_verifikasi === 'ditolak') { %>
+                                    <span class="status-ditolak">Ditolak</span>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        <% } %>
+    </div>
+
+</body>
+</html>

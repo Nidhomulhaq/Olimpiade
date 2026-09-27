@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dasbor Panitia - Portal Olimpiade</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .wadah {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333333;
+            margin-top: 0;
+        }
+        .menu-navigasi {
+            background-color: #eef2f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .menu-navigasi a {
+            margin-right: 20px;
+            text-decoration: none;
+            color: #0056b3;
+            font-weight: bold;
+        }
+        .menu-navigasi a:hover {
+            text-decoration: underline;
+            color: #003d82;
+        }
+        .menu-navigasi a.merah {
+            color: #d9534f;
+        }
+        .konten {
+            padding: 15px;
+            border: 1px solid #dddddd;
+            border-radius: 5px;
+        }
+        ul {
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wadah">
+        <h1>Portal Manajemen Panitia</h1>
+        <p>Selamat bertugas, <strong><%= nama %></strong>.</p>
+        
+        <div class="menu-navigasi">
+            <a href="/dasbor-panitia">Beranda</a>
+            <a href="/panitia/verifikasi">Verifikasi Peserta</a>
+            <a href="/panitia/soal">Manajemen Soal</a>
+            <a href="/panitia/ujian">Kendali Ujian & Nilai</a>
+            <a href="/keluar" class="merah">Keluar (Logout)</a>
+        </div>
+
+        <div class="konten">
+            <h2>Ringkasan Sistem</h2>
+            <p>Silakan gunakan menu navigasi di atas untuk mengelola tahapan olimpiade. Fitur yang tersedia meliputi:</p>
+            <ul>
+                <li><strong>Verifikasi Peserta:</strong> Memeriksa keabsahan kartu pelajar dan bukti transfer.</li>
+                <li><strong>Manajemen Soal:</strong> Menambah, mengubah, dan menghapus bank soal pilihan ganda.</li>
+                <li><strong>Kendali Ujian & Nilai:</strong> Memulai waktu ujian, memantau kecurangan (pindah tab), dan menerbitkan papan peringkat.</li>
+            </ul>
+        </div>
+    </div>
+
+</body>
+</html>

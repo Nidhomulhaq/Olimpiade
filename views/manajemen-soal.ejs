@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Bank Soal - Panitia</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px; }
+        .wadah { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .menu-navigasi { background-color: #eef2f5; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .menu-navigasi a { margin-right: 20px; text-decoration: none; color: #0056b3; font-weight: bold; }
+        form.form-soal { background: #fdfdfd; border: 1px solid #ddd; padding: 20px; border-radius: 6px; margin-bottom: 30px; }
+        label { display: block; margin-top: 10px; font-weight: bold; }
+        textarea, input[type="text"], select { width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; }
+        button.btn-simpan { background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin-top: 15px; }
+        button.btn-hapus { background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #dddddd; padding: 10px; text-align: left; vertical-align: top; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+
+    <div class="wadah">
+        <h1>Manajemen Bank Soal Olimpiade</h1>
+        <div class="menu-navigasi">
+            <a href="/dasbor-panitia">Kembali ke Dasbor</a>
+        </div>
+
+        <!-- Formulir Tambah Soal -->
+        <form action="/panitia/soal/tambah" method="POST" class="form-soal">
+            <h3>Tambah Soal Baru (Pilihan Ganda)</h3>
+            
+            <label for="teks_soal">Pertanyaan Soal:</label>
+            <textarea id="teks_soal" name="teks_soal" rows="3" required placeholder="Tuliskan pertanyaan di sini..."></textarea>
+
+            <label for="pilihan_a">Pilihan A:</label>
+            <input type="text" id="pilihan_a" name="pilihan_a" required placeholder="Jawaban A">
+
+            <label for="pilihan_b">Pilihan B:</label>
+            <input type="text" id="pilihan_b" name="pilihan_b" required placeholder="Jawaban B">
+
+            <label for="pilihan_c">Pilihan C:</label>
+            <input type="text" id="pilihan_c" name="pilihan_c" required placeholder="Jawaban C">
+
+            <label for="pilihan_d">Pilihan D:</label>
+            <input type="text" id="pilihan_d" name="pilihan_d" required placeholder="Jawaban D">
+
+            <label for="jawaban_benar">Kunci Jawaban Benar:</label>
+            <select id="jawaban_benar" name="jawaban_benar" required>
+                <option value="">-- Pilih Kunci Jawaban --</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+            </select>
+
+            <button type="submit" class="btn-simpan">Simpan Soal</button>
+        </form>
+
+        <!-- Daftar Soal yang Tersedia -->
+        <h3>Daftar Soal dalam Basis Data (<%= daftarSoal.length %> Soal)</h3>
+        <% if (daftarSoal.length === 0) { %>
+            <p>Belum ada soal yang dimasukkan ke dalam sistem.</p>
+        <% } else { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 5%;">No</th>
+                        <th style="width: 65%;">Pertanyaan & Pilihan</th>
+                        <th style="width: 15%;">Kunci</th>
+                        <th style="width: 15%;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% daftarSoal.forEach(function(soal, index) { %>
+                        <tr>
+                            <td><%= index + 1 %></td>
+                            <td>
+                                <strong><%= soal.teks_soal %></strong><br>
+                                A. <%= soal.pilihan_a %><br>
+                                B. <%= soal.pilihan_b %><br>
+                                C. <%= soal.pilihan_c %><br>
+                                D. <%= soal.pilihan_d %>
+                            </td>
+                            <td><strong style="color: green;"><%= soal.jawaban_benar %></strong></td>
+                            <td>
+                                <form action="/panitia/soal/hapus/<%= soal.id_soal %>" method="POST" onsubmit="return confirm('Yakin ingin menghapus soal ini?');">
+                                    <button type="submit" class="btn-hapus">Hapus</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        <% } %>
+    </div>
+
+</body>
+</html>

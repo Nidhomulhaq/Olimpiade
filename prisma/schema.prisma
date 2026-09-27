@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Pengguna {
+  id_pengguna    Int                 @id @default(autoincrement())
+  nama_lengkap   String?
+  email          String              @unique
+  kata_sandi     String
+  peran          String              @default("peserta") 
+  status_tahapan String              @default("isi_data")
+  dokumen        DokumenPendaftaran?
+  hasil_ujian    HasilUjian?
+}
+
+model DokumenPendaftaran {
+  id_dokumen        Int      @id @default(autoincrement())
+  pengguna          Pengguna @relation(fields: [id_pengguna], references: [id_pengguna])
+  id_pengguna       Int      @unique
+  asal_sekolah      String?
+  berkas_identitas  String?
+  bukti_pembayaran  String?
+  status_verifikasi String   @default("menunggu") 
+}
+
+model Soal {
+  id_soal       Int    @id @default(autoincrement())
+  teks_soal     String
+  pilihan_a     String
+  pilihan_b     String
+  pilihan_c     String
+  pilihan_d     String
+  jawaban_benar String 
+}
+
+model HasilUjian {
+  id_hasil           Int      @id @default(autoincrement())
+  pengguna           Pengguna @relation(fields: [id_pengguna], references: [id_pengguna])
+  id_pengguna        Int      @unique
+  jawaban_peserta    String?  
+  jumlah_pelanggaran Int      @default(0)
+  status_ujian       String   @default("sedang_dikerjakan")
+  nilai_akhir        Float?
+  status_publikasi   String   @default("belum")
+}

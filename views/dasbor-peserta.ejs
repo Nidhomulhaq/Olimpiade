@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dasbor Peserta</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; margin: 0; }
+        .wadah { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .peringatan { background-color: #fff3cd; color: #856404; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .sukses { background-color: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        label { display: block; margin-top: 15px; font-weight: bold; }
+        input[type="text"], input[type="file"] { width: 100%; padding: 10px; margin-top: 5px; box-sizing: border-box; }
+        button { margin-top: 20px; padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; }
+        button:hover { background-color: #0056b3; }
+        a.keluar { display: inline-block; margin-top: 20px; color: #dc3545; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="wadah">
+        <h1>Portal Peserta Olimpiade</h1>
+        <p>Selamat datang, <strong><%= pengguna.nama_lengkap %></strong>.</p>
+        <hr><br>
+
+        <% if (pengguna.status_tahapan === 'isi_data') { %>
+            <!-- Tampilan jika peserta belum mengunggah dokumen -->
+            <div class="peringatan">
+                <strong>Perhatian:</strong> Anda harus melengkapi data dan mengunggah dokumen pendaftaran sebelum dapat mengikuti ujian.
+            </div>
+
+            <form action="/peserta/unggah" method="POST" enctype="multipart/form-data">
+                <label for="asal_sekolah">Asal Sekolah:</label>
+                <input type="text" id="asal_sekolah" name="asal_sekolah" required placeholder="Contoh: SMAN 1 Lamongan">
+
+                <label for="berkas_identitas">Unggah Kartu Pelajar (Gambar/PDF):</label>
+                <input type="file" id="berkas_identitas" name="berkas_identitas" accept="image/*,.pdf" required>
+
+                <label for="bukti_pembayaran">Unggah Bukti Pembayaran (Gambar/PDF):</label>
+                <input type="file" id="bukti_pembayaran" name="bukti_pembayaran" accept="image/*,.pdf" required>
+
+                <button type="submit">Kirim Dokumen</button>
+            </form>
+
+        <% } else if (pengguna.status_tahapan === 'menunggu_verifikasi') { %>
+            <!-- Tampilan jika peserta sudah mengunggah dan sedang menunggu -->
+            <div class="peringatan" style="background-color: #d1ecf1; color: #0c5460;">
+                <strong>Tahap Verifikasi:</strong> Dokumen Anda telah diterima dan saat ini sedang dalam proses pengecekan oleh panitia. Silakan periksa kembali halaman ini secara berkala.
+            </div>
+
+        <% } else if (pengguna.status_tahapan === 'siap_ujian') { %>
+            <!-- Tampilan jika dokumen diterima dan siap ujian -->
+            <div class="sukses">
+                <strong>Verifikasi Berhasil!</strong> Dokumen pendaftaran Anda telah disetujui. Anda sudah memenuhi syarat untuk mengikuti ujian.
+            </div>
+            <a href="/peserta/ujian">
+    <button style="background-color: #28a745;">Masuk ke Ruang Ujian Sekarang</button>
+</a>
+        <% } %>
+
+        <a href="/keluar" class="keluar">Keluar (Logout)</a>
+    </div>
+
+</body>
+</html>
