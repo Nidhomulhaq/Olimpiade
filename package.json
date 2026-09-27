@@ -1,27 +1,21 @@
 {
-  "name": "olimpiade",
+  "name": "olimpiade-online",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Sistem Olimpiade Online",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon server.js",
-    "db:push": "prisma db push"
+    "start": "node server.js",
+    "postinstall": "prisma generate"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
-    "ejs": "^6.0.1",
-    "express": "^5.2.1",
-    "express-session": "^1.19.0",
-    "multer": "^2.4.0",
-    "serverless-http": "^4.0.0"
+    "@prisma/client": "*",
+    "ejs": "*",
+    "express": "*",
+    "express-session": "*",
+    "multer": "*",
+    "serverless-http": "*"
   },
   "devDependencies": {
-    "@prisma/client": "^5.22.0",
-    "nodemon": "^3.1.14",
-    "prisma": "^8.0.0-rc.17"
+    "prisma": "*"
   }
 }

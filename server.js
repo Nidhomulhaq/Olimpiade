@@ -7,21 +7,28 @@ const fs = require('fs');
 
 const app = express();
 const prisma = new PrismaClient();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json()); // Diperlukan untuk membaca data JSON dari AJAX/Auto-save
+app.use(express.json());
 
+// Mencegah galat "Read-Only File System" di Vercel saat peladen dinyalakan
 const direktoriUnggahan = './public/uploads';
-if (!fs.existsSync(direktoriUnggahan)){
-    fs.mkdirSync(direktoriUnggahan, { recursive: true });
+try {
+    if (!fs.existsSync(direktoriUnggahan)){
+        fs.mkdirSync(direktoriUnggahan, { recursive: true });
+    }
+} catch (galat) {
+    console.log("Vercel mode: Melewati pembuatan folder lokal.");
 }
 
 const penyimpanan = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'public/uploads/')
+        // Gunakan folder /tmp khusus di Vercel agar fitur unggah tidak galat
+        const dir = process.env.VERCEL ? '/tmp' : './public/uploads';
+        cb(null, dir)
     },
     filename: function (req, file, cb) {
         cb(null, Date.now() + path.extname(file.originalname))
@@ -256,7 +263,6 @@ app.get('/peserta/ujian', async (req, res) => {
                 return res.redirect('/dasbor-peserta');
             }
 
-            // Cek atau buat sesi hasil ujian peserta
             let hasilUjian = await prisma.hasilUjian.findUnique({
                 where: { id_pengguna: req.session.penggunaId }
             });
@@ -275,7 +281,6 @@ app.get('/peserta/ujian', async (req, res) => {
             }
 
             const daftarSoal = await prisma.soal.findMany();
-            // Parsing jawaban tersimpan sebelumnya jika ada
             let jawabanTersimpan = {};
             if (hasilUjian.jawaban_peserta) {
                 try { jawabanTersimpan = JSON.parse(hasilUjian.jawaban_peserta); } catch(e){}
@@ -296,7 +301,6 @@ app.get('/peserta/ujian', async (req, res) => {
     }
 });
 
-// Endpoint Auto-Save Jawaban Ujian
 app.post('/peserta/ujian/autosave', async (req, res) => {
     if (req.session.penggunaId && req.session.peran === 'peserta') {
         try {
@@ -314,7 +318,6 @@ app.post('/peserta/ujian/autosave', async (req, res) => {
     }
 });
 
-// Endpoint Catat Pelanggaran (Pindah Tab)
 app.post('/peserta/ujian/pelanggaran', async (req, res) => {
     if (req.session.penggunaId && req.session.peran === 'peserta') {
         try {
@@ -326,7 +329,7 @@ app.post('/peserta/ujian/pelanggaran', async (req, res) => {
             let statusUjianBaru = 'sedang_dikerjakan';
 
             if (pelanggaranBaru >= 3) {
-                statusUjianBaru = 'selesai'; // Otomatis kumpulkan jika melanggar 3 kali
+                statusUjianBaru = 'selesai'; 
             }
 
             await prisma.hasilUjian.update({
@@ -346,14 +349,12 @@ app.post('/peserta/ujian/pelanggaran', async (req, res) => {
     }
 });
 
-// Endpoint Selesai Ujian / Pengumpulan Akhir
 app.post('/peserta/ujian/selesai', async (req, res) => {
     if (req.session.penggunaId && req.session.peran === 'peserta') {
         try {
             const idPengguna = req.session.penggunaId;
             const jawabanObj = req.body.jawaban || {};
 
-            // Hitung nilai otomatis
             const daftarSoal = await prisma.soal.findMany();
             let jawabanBenarTotal = 0;
 
@@ -390,12 +391,11 @@ app.get('/keluar', (req, res) => {
     res.redirect('/');
 });
 
-// Jalankan secara lokal jika bukan di lingkungan produksi Vercel
-if (process.env.NODE_ENV !== 'production') {
+// Menyesuaikan pengeksporan untuk Vercel vs Lokal
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     app.listen(port, () => {
         console.log(`Peladen berjalan di http://localhost:${port}`);
     });
 }
 
-// Mengekspor aplikasi agar bisa dibaca oleh Vercel Serverless
 module.exports = app;
