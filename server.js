@@ -393,11 +393,8 @@ app.get('/keluar', (req, res) => {
     res.redirect('/');
 });
 
-// Menyesuaikan pengeksporan untuk Vercel vs Lokal
-if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
-    app.listen(port, () => {
-        console.log(`Peladen berjalan di http://localhost:${port}`);
-    });
-}
+app.listen(port, () => {
+    console.log(`Peladen berjalan di port ${port}`);
+});
 
 module.exports = app;
