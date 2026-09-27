@@ -1,22 +1,20 @@
 {
-  "name": "olimpiade-online",
-  "version": "1.0.0",
-  "description": "Sistem Olimpiade Online",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "build": "prisma generate",
-    "vercel-build": "prisma generate"
-  },
-  "dependencies": {
-    "@prisma/client": "*",
-    "ejs": "*",
-    "express": "*",
-    "express-session": "*",
-    "multer": "*",
-    "serverless-http": "*"
-  },
-  "devDependencies": {
-    "prisma": "*"
-  }
+"name": "olimpiade-online",
+"version": "1.0.0",
+"description": "Sistem Olimpiade Online",
+"main": "server.js",
+"scripts": {
+"start": "node server.js",
+"build": "npx prisma generate",
+"vercel-build": "npx prisma generate"
+},
+"dependencies": {
+"@prisma/client": "",
+"ejs": "",
+"express": "",
+"express-session": "",
+"multer": "",
+"prisma": "",
+"serverless-http": "*"
+}
 }
