@@ -390,6 +390,12 @@ app.get('/keluar', (req, res) => {
     res.redirect('/');
 });
 
-app.listen(port, () => {
-    console.log(`Peladen berjalan di http://localhost:${port}`);
-});
+// Jalankan secara lokal jika bukan di lingkungan produksi Vercel
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(port, () => {
+        console.log(`Peladen berjalan di http://localhost:${port}`);
+    });
+}
+
+// Mengekspor aplikasi agar bisa dibaca oleh Vercel Serverless
+module.exports = app;
