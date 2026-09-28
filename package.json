@@ -1,18 +1,1 @@
-{
-"name": "olimpiade-online",
-"version": "1.0.0",
-"description": "Sistem Olimpiade Online",
-"main": "server.js",
-"scripts": {
-"start": "node server.js",
-"build": "prisma generate"
-},
-"dependencies": {
-"@prisma/client": "^5.22.0",
-"ejs": "^3.1.9",
-"express": "^4.18.2",
-"express-session": "^1.17.3",
-"multer": "^1.4.5-lts.1",
-"prisma": "^5.22.0"
-}
-}
+{"name":"olimpiade-online","version":"1.0.0","description":"Sistem Olimpiade Online","main":"server.js","scripts":{"start":"node server.js","build":"prisma generate"},"dependencies":{"@prisma/client":"^5.22.0","@supabase/supabase-js":"^2.117.2","ejs":"^3.1.9","express":"^4.18.2","express-session":"^1.17.3","multer":"^1.4.5-lts.1","prisma":"^5.22.0"}}

@@ -3,39 +3,25 @@ const session = require('express-session');
 const { PrismaClient } = require('@prisma/client');
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
+const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 const prisma = new PrismaClient();
 const port = process.env.PORT || 3000;
 
+// Inisialisasi Supabase
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
 app.set('view engine', 'ejs');
-// Menambahkan __dirname agar Vercel tidak tersesat mencari folder
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Mencegah galat "Read-Only File System" di Vercel saat peladen dinyalakan
-const direktoriUnggahan = './public/uploads';
-try {
-    if (!fs.existsSync(direktoriUnggahan)){
-        fs.mkdirSync(direktoriUnggahan, { recursive: true });
-    }
-} catch (galat) {
-    console.log("Vercel mode: Melewati pembuatan folder lokal.");
-}
-
-const penyimpanan = multer.diskStorage({
-    destination: function (req, file, cb) {
-        // Gunakan folder /tmp khusus di Vercel agar fitur unggah tidak galat
-        const dir = process.env.VERCEL ? '/tmp' : './public/uploads';
-        cb(null, dir)
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + path.extname(file.originalname))
-    }
-});
+// Mengubah multer menjadi Memory Storage (menyimpan di RAM sementara sebelum dikirim ke Supabase)
+const penyimpanan = multer.memoryStorage();
 const unggah = multer({ storage: penyimpanan });
 
 app.use(session({
@@ -224,18 +210,42 @@ app.get('/dasbor-peserta', async (req, res) => {
     }
 });
 
+// Perombakan Utama Rute Unggah ke Supabase
 app.post('/peserta/unggah', unggah.fields([{ name: 'berkas_identitas', maxCount: 1 }, { name: 'bukti_pembayaran', maxCount: 1 }]), async (req, res) => {
     if (req.session.penggunaId && req.session.peran === 'peserta') {
         try {
             const idPengguna = req.session.penggunaId;
             const asalSekolah = req.body.asal_sekolah;
-            const berkasIdentitas = req.files['berkas_identitas'][0].filename;
-            const buktiPembayaran = req.files['bukti_pembayaran'][0].filename;
 
+            // Fungsi pembantu untuk mengunggah ke Supabase
+            const unggahKeSupabase = async (fileBerkas) => {
+                const namaUnik = `${Date.now()}-${fileBerkas.originalname.replace(/\s+/g, '_')}`;
+                
+                // Proses unggah
+                const { error } = await supabase.storage
+                    .from('dokumen-pendaftaran')
+                    .upload(`peserta/${namaUnik}`, fileBerkas.buffer, {
+                        contentType: fileBerkas.mimetype
+                    });
+
+                if (error) throw error;
+                
+                // Mengambil tautan publik dari berkas yang baru diunggah
+                const { data } = supabase.storage
+                    .from('dokumen-pendaftaran')
+                    .getPublicUrl(`peserta/${namaUnik}`);
+                    
+                return data.publicUrl;
+            };
+
+            const urlIdentitas = await unggahKeSupabase(req.files['berkas_identitas'][0]);
+            const urlPembayaran = await unggahKeSupabase(req.files['bukti_pembayaran'][0]);
+
+            // Simpan tautan lengkapnya ke dalam pangkalan data
             await prisma.dokumenPendaftaran.upsert({
                 where: { id_pengguna: idPengguna },
-                update: { asal_sekolah, berkas_identitas, bukti_pembayaran, status_verifikasi: 'menunggu' },
-                create: { id_pengguna: idPengguna, asal_sekolah, berkas_identitas, bukti_pembayaran, status_verifikasi: 'menunggu' }
+                update: { asal_sekolah, berkas_identitas: urlIdentitas, bukti_pembayaran: urlPembayaran, status_verifikasi: 'menunggu' },
+                create: { id_pengguna: idPengguna, asal_sekolah, berkas_identitas: urlIdentitas, bukti_pembayaran: urlPembayaran, status_verifikasi: 'menunggu' }
             });
 
             await prisma.pengguna.update({
