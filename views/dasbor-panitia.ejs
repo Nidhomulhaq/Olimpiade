@@ -3,101 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dasbor Panitia - Olimpiade</title>
-    <link rel="stylesheet" href="/output.css">
+    <title>Dasbor Panitia - Portal Olimpiade</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .wadah {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333333;
+            margin-top: 0;
+        }
+        .menu-navigasi {
+            background-color: #eef2f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .menu-navigasi a {
+            margin-right: 20px;
+            text-decoration: none;
+            color: #0056b3;
+            font-weight: bold;
+        }
+        .menu-navigasi a:hover {
+            text-decoration: underline;
+            color: #003d82;
+        }
+        .menu-navigasi a.merah {
+            color: #d9534f;
+        }
+        .konten {
+            padding: 15px;
+            border: 1px solid #dddddd;
+            border-radius: 5px;
+        }
+        ul {
+            line-height: 1.8;
+        }
+    </style>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800">
+<body>
 
-    <!-- Header / Navbar -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <span class="bg-indigo-600 text-white font-bold px-2.5 py-1 rounded-lg text-sm">Panitia</span>
-                <h1 class="text-lg font-bold text-slate-900 hidden sm:block">Portal Panitia Olimpiade</h1>
-            </div>
-            <div class="flex items-center space-x-3 sm:space-x-4 text-sm font-medium">
-                <a href="/panitia/verifikasi" class="text-slate-600 hover:text-indigo-600 transition">Verifikasi Dokumen</a>
-                <a href="/panitia/soal" class="text-slate-600 hover:text-indigo-600 transition">Manajemen Soal</a>
-                <a href="/panitia/ujian" class="text-slate-600 hover:text-indigo-600 transition">Ruang Ujian</a>
-                <a href="/keluar" class="bg-rose-50 text-rose-600 hover:bg-rose-100 px-3 py-1.5 rounded-lg transition">Keluar</a>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="wadah">
+        <h1>Portal Manajemen Panitia</h1>
+        <p>Selamat bertugas, <strong><%= nama %></strong>.</p>
         
-        <!-- Welcome Section & Quick Menu -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
-            <h2 class="text-2xl font-bold text-slate-900">Dasbor Panitia</h2>
-            <p class="text-slate-500 text-sm mt-1">Kelola pendaftaran peserta, verifikasi berkas, serta bank soal olimpiade.</p>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                <a href="/panitia/verifikasi" class="p-4 rounded-xl border border-slate-200 hover:border-indigo-500 hover:shadow-md transition bg-slate-50 group block">
-                    <div class="font-bold text-indigo-600 group-hover:text-indigo-700">📋 Verifikasi Dokumen Peserta</div>
-                    <p class="text-xs text-slate-500 mt-1">Periksa kartu pelajar & bukti pembayaran peserta.</p>
-                </a>
-                <a href="/panitia/soal" class="p-4 rounded-xl border border-slate-200 hover:border-indigo-500 hover:shadow-md transition bg-slate-50 group block">
-                    <div class="font-bold text-indigo-600 group-hover:text-indigo-700">📝 Manajemen Soal</div>
-                    <p class="text-xs text-slate-500 mt-1">Tambah, edit, dan atur kunci jawaban ujian.</p>
-                </a>
-                <a href="/panitia/ujian" class="p-4 rounded-xl border border-slate-200 hover:border-indigo-500 hover:shadow-md transition bg-slate-50 group block">
-                    <div class="font-bold text-indigo-600 group-hover:text-indigo-700">🖥️ Ruang Pantau Ujian</div>
-                    <p class="text-xs text-slate-500 mt-1">Pantau status peserta yang sedang mengerjakan ujian.</p>
-                </a>
-            </div>
+        <div class="menu-navigasi">
+            <a href="/dasbor-panitia">Beranda</a>
+            <a href="/panitia/verifikasi">Verifikasi Peserta</a>
+            <a href="/panitia/soal">Manajemen Soal</a>
+            <a href="/panitia/ujian">Kendali Ujian & Nilai</a>
+            <a href="/keluar" class="merah">Keluar (Logout)</a>
         </div>
 
-        <!-- Tabel Daftar Peserta -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="p-6 border-b border-slate-200">
-                <h3 class="text-lg font-bold text-slate-900">Daftar Peserta Terdaftar</h3>
-                <p class="text-xs text-slate-500 mt-0.5">Status kelengkapan berkas dan kelayakan ujian seluruh peserta.</p>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm text-slate-600">
-                    <thead class="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200">
-                        <tr>
-                            <th class="px-6 py-3">Nama Lengkap</th>
-                            <th class="px-6 py-3">Email</th>
-                            <th class="px-6 py-3">Asal Sekolah</th>
-                            <th class="px-6 py-3">Status Tahapan</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        <% daftar_peserta.forEach(peserta => { %>
-                            <tr class="hover:bg-slate-50/50 transition">
-                                <td class="px-6 py-4 font-medium text-slate-900"><%= peserta.nama_lengkap %></td>
-                                <td class="px-6 py-4"><%= peserta.email %></td>
-                                <td class="px-6 py-4"><%= peserta.asal_sekolah || '-' %></td>
-                                <td class="px-6 py-4">
-                                    <% if (peserta.status_tahapan === 'isi_data') { %>
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                                            Belum Lengkap
-                                        </span>
-                                    <% } else if (peserta.status_tahapan === 'menunggu_verifikasi') { %>
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-800">
-                                            Menunggu Verifikasi
-                                        </span>
-                                    <% } else if (peserta.status_tahapan === 'siap_ujian') { %>
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                                            Siap Ujian
-                                        </span>
-                                    <% } else { %>
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
-                                            <%= peserta.status_tahapan %>
-                                        </span>
-                                    <% } %>
-                                </td>
-                            </tr>
-                        <% }) %>
-                    </tbody>
-                </table>
-            </div>
+        <div class="konten">
+            <h2>Ringkasan Sistem</h2>
+            <p>Silakan gunakan menu navigasi di atas untuk mengelola tahapan olimpiade. Fitur yang tersedia meliputi:</p>
+            <ul>
+                <li><strong>Verifikasi Peserta:</strong> Memeriksa keabsahan kartu pelajar dan bukti transfer.</li>
+                <li><strong>Manajemen Soal:</strong> Menambah, mengubah, dan menghapus bank soal pilihan ganda.</li>
+                <li><strong>Kendali Ujian & Nilai:</strong> Memulai waktu ujian, memantau kecurangan (pindah tab), dan menerbitkan papan peringkat.</li>
+            </ul>
         </div>
-
-    </main>
+    </div>
 
 </body>
 </html>
