@@ -215,11 +215,14 @@ app.post('/peserta/unggah', unggah.fields([{ name: 'berkas_identitas', maxCount:
     if (req.session.penggunaId && req.session.peran === 'peserta') {
         try {
             const idPengguna = req.session.penggunaId;
-            const asalSekolah = req.body.asal_sekolah;
+            // Jika asal_sekolah kosong/tidak terbaca, beri nilai default "-" agar Prisma tidak crash
+            const asalSekolah = req.body.asal_sekolah || "-"; 
 
             // Fungsi pembantu untuk mengunggah ke Supabase
             const unggahKeSupabase = async (fileBerkas) => {
-                const namaUnik = `${Date.now()}-${fileBerkas.originalname.replace(/\s+/g, '_')}`;
+                // Menghapus karakter aneh dari nama fail asli agar tautan URL tidak rusak
+                const namaAman = fileBerkas.originalname.replace(/[^a-zA-Z0-9.\-_]/g, '');
+                const namaUnik = `${Date.now()}-${namaAman}`;
                 
                 // Proses unggah
                 const { error } = await supabase.storage
@@ -230,7 +233,7 @@ app.post('/peserta/unggah', unggah.fields([{ name: 'berkas_identitas', maxCount:
 
                 if (error) throw error;
                 
-                // Mengambil tautan publik dari berkas yang baru diunggah
+                // Mengambil tautan publik
                 const { data } = supabase.storage
                     .from('dokumen-pendaftaran')
                     .getPublicUrl(`peserta/${namaUnik}`);
@@ -241,22 +244,40 @@ app.post('/peserta/unggah', unggah.fields([{ name: 'berkas_identitas', maxCount:
             const urlIdentitas = await unggahKeSupabase(req.files['berkas_identitas'][0]);
             const urlPembayaran = await unggahKeSupabase(req.files['bukti_pembayaran'][0]);
 
-            // Simpan tautan lengkapnya ke dalam pangkalan data
-            await prisma.dokumenPendaftaran.upsert({
-                where: { id_pengguna: idPengguna },
-                update: { asal_sekolah, berkas_identitas: urlIdentitas, bukti_pembayaran: urlPembayaran, status_verifikasi: 'menunggu' },
-                create: { id_pengguna: idPengguna, asal_sekolah, berkas_identitas: urlIdentitas, bukti_pembayaran: urlPembayaran, status_verifikasi: 'menunggu' }
+            // [PERBAIKAN PRISMA]: Mencari dokumen menggunakan findFirst untuk menghindari galat Unique Constraint
+            const dokumenAda = await prisma.dokumenPendaftaran.findFirst({
+                where: { id_pengguna: idPengguna }
             });
+
+            if (dokumenAda) {
+                // Jika dokumen lama ada, perbarui berdasarkan id_dokumen
+                await prisma.dokumenPendaftaran.update({
+                    where: { id_dokumen: dokumenAda.id_dokumen },
+                    data: { asal_sekolah: asalSekolah, berkas_identitas: urlIdentitas, bukti_pembayaran: urlPembayaran, status_verifikasi: 'menunggu' }
+                });
+            } else {
+                // Jika belum ada, buat rekam jejak baru
+                await prisma.dokumenPendaftaran.create({
+                    data: { id_pengguna: idPengguna, asal_sekolah: asalSekolah, berkas_identitas: urlIdentitas, bukti_pembayaran: urlPembayaran, status_verifikasi: 'menunggu' }
+                });
+            }
 
             await prisma.pengguna.update({
                 where: { id_pengguna: idPengguna },
                 data: { status_tahapan: 'menunggu_verifikasi' }
             });
 
+            // Jika semua lancar, kembalikan ke dasbor
             res.redirect('/dasbor-peserta');
         } catch (galat) {
             console.error(galat);
-            res.send('Terjadi kesalahan saat mengunggah dokumen.');
+            // [PELACAK GALAT]: Akan mencetak teks error asli ke layar putih web Anda!
+            res.send(`<div style="font-family: sans-serif; padding: 20px;">
+                        <h2 style="color: red;">Penyimpanan Gagal!</h2>
+                        <p>Dokumen masuk ke Supabase, tapi gagal disimpan ke Database (Prisma). Berikut detail kesalahannya:</p>
+                        <textarea style="width: 100%; height: 200px; padding: 10px;">${galat.message}</textarea>
+                        <br><br><a href="/dasbor-peserta">Kembali</a>
+                      </div>`);
         }
     } else {
         res.redirect('/');
