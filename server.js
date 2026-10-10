@@ -429,3 +429,5 @@ app.listen(port, () => {
 });
 
 module.exports = app;
+
+// Pancingan untuk memaksa pembaruan ke Railway
