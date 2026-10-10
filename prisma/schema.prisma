@@ -20,12 +20,12 @@ model Pengguna {
 
 model DokumenPendaftaran {
   id_dokumen        Int      @id @default(autoincrement())
-  pengguna          Pengguna @relation(fields: [id_pengguna], references: [id_pengguna])
   id_pengguna       Int      @unique
-  asal_sekolah      String?
-  berkas_identitas  String?
-  bukti_pembayaran  String?
-  status_verifikasi String   @default("menunggu") 
+  asal_sekolah      String
+  berkas_identitas  String   // Pastikan ini menggunakan String (untuk menyimpan URL)
+  bukti_pembayaran  String   // Pastikan ini menggunakan String (untuk menyimpan URL)
+  status_verifikasi String   @default("menunggu")
+  pengguna          Pengguna @relation(fields: [id_pengguna], references: [id_pengguna])
 }
 
 model Soal {
